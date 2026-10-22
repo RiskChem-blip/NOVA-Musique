@@ -17,6 +17,7 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
@@ -38,6 +39,12 @@ import java.util.concurrent.Executors
  * La lecture est confiée au service PlaybackService, piloté ici par un MediaController.
  */
 class MainActivity : ComponentActivity() {
+
+    companion object {
+        /** Origine de l'interface = nom du paquet de l'appli (identité attendue par YouTube). */
+        const val HOST = "app.nova.musique"
+        private val NET_HOSTS = setOf("ws.audioscrobbler.com", "api.listenbrainz.org", "www.googleapis.com")
+    }
 
     private lateinit var web: WebView
     private val main = Handler(Looper.getMainLooper())
@@ -83,17 +90,20 @@ class MainActivity : ComponentActivity() {
 
         web.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
-                if (request.url.scheme == "file") return false
+                // Le lecteur YouTube navigue dans son propre cadre : on le laisse faire
+                if (!request.isForMainFrame || request.url.host == HOST) return false
                 openUrl(request.url.toString())
                 return true
             }
 
-            // https://nova-musique.local/... : pochettes et appels Last.fm / ListenBrainz faits par Android
+            // https://app.nova.musique/... : l'interface, les pochettes et les appels réseau faits par Android.
+            // Une vraie origine https est indispensable : YouTube refuse sa lecture (erreur 153) sans elle.
             override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? {
                 val u = request.url
-                if (u.host != "nova-musique.local") return null
+                if (u.host != HOST) return null
                 val path = u.path ?: ""
                 return when {
+                    path == "/" || path == "/index.html" -> pageResponse()
                     path.startsWith("/art/") -> artResponse(path.removePrefix("/art/"), u.getQueryParameter("a") ?: "")
                     path == "/net" -> netResponse(u.getQueryParameter("u") ?: "")
                     else -> textResponse(404, "")
@@ -104,7 +114,7 @@ class MainActivity : ComponentActivity() {
         web.addJavascriptInterface(Bridge(), "NovaMusiqueAndroid")
 
         setContentView(web)
-        web.loadUrl("file:///android_asset/index.html")
+        web.loadUrl("https://$HOST/index.html")
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
@@ -124,6 +134,11 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onStop() {
+        // YouTube n'autorise pas la lecture en arrière-plan : l'interface met en pause
+        try {
+            web.evaluateJavascript("window.novaEvent && novaEvent({type:'hidden'})", null)
+        } catch (_: Exception) {
+        }
         disconnect()
         super.onStop()
     }
@@ -261,23 +276,50 @@ class MainActivity : ComponentActivity() {
         )
     }
 
-    /** Lecture des statistiques : seulement Last.fm et ListenBrainz. */
+    private fun pageResponse(): WebResourceResponse =
+        WebResourceResponse(
+            "text/html", "utf-8", 200, "OK",
+            mapOf("Cache-Control" to "no-store"), assets.open("index.html")
+        )
+
+    /** Appels réseau de l'interface : seulement Last.fm, ListenBrainz et l'API de recherche YouTube. */
     private fun netResponse(target: String): WebResourceResponse {
         val host = try {
             Uri.parse(target).host ?: ""
         } catch (_: Exception) {
             ""
         }
-        if (!target.startsWith("https://") || (host != "ws.audioscrobbler.com" && host != "api.listenbrainz.org")) {
+        if (!target.startsWith("https://") || host !in NET_HOSTS) {
             return textResponse(403, "{\"error\":\"adresse refusée\"}")
         }
+        // ListenBrainz : le jeton donne accès aux playlists et recommandations personnelles
+        val token = Scrobbler.prefs(this).getString("lb_token", "") ?: ""
+        val headers = if (host == "api.listenbrainz.org" && token.isNotBlank()) mapOf("Authorization" to "Token $token") else emptyMap()
         return try {
-            val r = Scrobbler.http("GET", target)
+            val r = Scrobbler.http("GET", target, headers = headers)
             val code = if (r.code in 200..299 || r.code in 400..599) r.code else 502
             textResponse(code, r.body)
         } catch (e: Exception) {
             textResponse(599, "{\"error\":\"réseau\"}")
         }
+    }
+
+    /** Écoute envoyée par le lecteur YouTube de l'interface. */
+    private fun listenFrom(json: String): Listen? = try {
+        val o = JSONObject(json)
+        val artist = o.optString("artist").trim()
+        val track = o.optString("track").trim()
+        if (artist.isEmpty() || track.isEmpty()) null
+        else Listen(
+            artist = artist,
+            track = track,
+            album = o.optString("album").trim(),
+            albumArtist = "",
+            durationMs = o.optLong("dur"),
+            timestamp = o.optLong("ts").takeIf { it > 0 } ?: (System.currentTimeMillis() / 1000)
+        )
+    } catch (_: Exception) {
+        null
     }
 
     // ---------- Permission ----------
@@ -478,6 +520,36 @@ class MainActivity : ComponentActivity() {
             Scrobbler.flushAsync(this@MainActivity) {
                 js("window.novaEvent && novaEvent({type:'accounts'})")
             }
+        }
+
+        // Lecture YouTube : scrobbling fait par l'interface, écran allumé pendant la lecture
+        @JavascriptInterface
+        fun scrobbleRemote(json: String) {
+            listenFrom(json)?.let { Scrobbler.scrobble(this@MainActivity, it) }
+        }
+
+        @JavascriptInterface
+        fun nowPlayingRemote(json: String) {
+            listenFrom(json)?.let { Scrobbler.nowPlaying(this@MainActivity, it) }
+        }
+
+        @JavascriptInterface
+        fun keepScreenOn(on: Boolean) {
+            main.post {
+                if (on) window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                else window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            }
+        }
+
+        @JavascriptInterface
+        fun stopNative() = withPlayer { it.pause() }
+
+        @JavascriptInterface
+        fun youtubeKey(): String = Scrobbler.prefs(this@MainActivity).getString("yt_key", "") ?: ""
+
+        @JavascriptInterface
+        fun setYoutubeKey(key: String) {
+            Scrobbler.prefs(this@MainActivity).edit().putString("yt_key", key.trim()).apply()
         }
 
         // Divers
