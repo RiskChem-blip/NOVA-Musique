@@ -1,0 +1,47 @@
+name: Fabriquer l'APK Nova Musique
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Récupérer le projet
+        uses: actions/checkout@v4
+
+      - name: Vérifier Java et Android
+        run: |
+          echo "JAVA_HOME=${JAVA_HOME_17_X64:-$JAVA_HOME}" >> "$GITHUB_ENV"
+          echo "Android SDK : ${ANDROID_HOME:-$ANDROID_SDK_ROOT}"
+          ls "${ANDROID_HOME:-$ANDROID_SDK_ROOT}"
+
+      - name: Fabriquer l'APK
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon --stacktrace
+          cp app/build/outputs/apk/debug/app-debug.apk nova-musique.apk
+
+      - name: Publier l'APK (onglet Releases, lien direct)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v1.0.${{ github.run_number }}" nova-musique.apk \
+            --repo "${{ github.repository }}" \
+            --title "Nova Musique 1.0.${{ github.run_number }}" \
+            --notes "APK fabriqué automatiquement." \
+            --latest
+
+      - name: Copie de secours (onglet Actions)
+        if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: Nova-Musique-APK
+          path: nova-musique.apk
+          if-no-files-found: ignore
