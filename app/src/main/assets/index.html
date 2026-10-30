@@ -683,7 +683,7 @@ function render(y = 0){
 }
 function afterRender(){
   $$('[data-lazy]').forEach(mountLazy);
-  if (S.view === 'search'){ const i = $('#q'); if (i){ i.value = S.query; if (!S.query) setTimeout(() => i.focus(), 50); } }
+  if (S.view === 'search'){ const i = $('#q'); if (i){ i.value = S.query; if (!S.query) setTimeout(() => i.focus(), 50); } if (S.query) runYtSearch(); }
   if (S.view === 'profile') loadStats();
   if (S.view === 'playlist') loadPlaylist();
   markPlaying();
@@ -1142,18 +1142,29 @@ function ytResultsHTML(q){
     if (!r.tracks.length) return `<p class="muted">Aucune vidéo trouvée.</p>`;
     return rowsHTML(r.tracks);
   }
-  const q2 = ytQuota();
-  return `<button class="btn small" data-act="ytSearch">${ic('search')} Chercher « ${esc(q)} » sur YouTube</button>
-    <p class="help" style="margin-top:8px">Utilise 1 recherche (${q2.n}/${YT_DAILY} aujourd'hui).</p>`;
+  // Recherche automatique : rien à toucher, elle part dès que tu t'arrêtes d'écrire
+  if (norm(q).length < 3) return `<p class="muted">Encore quelques lettres…</p>`;
+  return `<div class="empty" style="padding:16px"><div class="spin"></div></div>`;
 }
+/* Recherches YouTube déjà faites : retenues 30 jours, elles ne coûtent plus rien */
+let ytSearchCache = store.get('ytsearch', {});
 async function runYtSearch(){
-  const q = S.query.trim(); if (!q) return;
-  S.ytRes = { q: S.query, loading: true };
-  const box = $('#ytResults'); if (box) box.innerHTML = ytResultsHTML(S.query);
-  try {
-    const res = await ytSearch(q, 10);
-    S.ytRes = { q: S.query, tracks: res.map(parseYt).filter(Boolean) };
-  } catch (e) { S.ytRes = { q: S.query, error: e.message }; }
+  const q = S.query.trim(), k = norm(q); if (k.length < 3) return;
+  if (S.ytRes && S.ytRes.q === S.query && !S.ytRes.error) return;
+  const hit = ytSearchCache[k];
+  if (hit && Date.now() - hit.at < 30 * 86400000){
+    S.ytRes = { q: S.query, tracks: hit.items.map(parseYt).filter(Boolean) };
+  } else {
+    S.ytRes = { q: S.query, loading: true };
+    const box = $('#ytResults'); if (box) box.innerHTML = ytResultsHTML(S.query);
+    try {
+      const res = await ytSearch(q, 10);
+      ytSearchCache[k] = { at: Date.now(), items: res };
+      const keys = Object.keys(ytSearchCache); if (keys.length > 300) delete ytSearchCache[keys[0]];
+      store.set('ytsearch', ytSearchCache);
+      S.ytRes = { q: S.query, tracks: res.map(parseYt).filter(Boolean) };
+    } catch (e) { S.ytRes = { q: S.query, error: e.message }; }
+  }
   if (S.view === 'search' && $('#ytResults')){ $('#ytResults').innerHTML = ytResultsHTML(S.query); markPlaying(); }
 }
 
@@ -1970,6 +1981,13 @@ document.addEventListener('input', e => {
   S.query = e.target.value;
   clearTimeout(searchT);
   searchT = setTimeout(() => { $('#results').innerHTML = searchResults(S.query); $$('#results [data-lazy]').forEach(mountLazy); markPlaying(); }, 120);
+  // YouTube : lancée toute seule après une courte pause dans la saisie (évite de gaspiller le quota à chaque lettre)
+  clearTimeout(ytT);
+  ytT = setTimeout(runYtSearch, 900);
+});
+let ytT = 0;
+document.addEventListener('keydown', e => {
+  if (e.target.id === 'q' && e.key === 'Enter'){ e.preventDefault(); clearTimeout(ytT); runYtSearch(); e.target.blur(); }
 });
 
 /* Écran « tous les titres d'un artiste » */
