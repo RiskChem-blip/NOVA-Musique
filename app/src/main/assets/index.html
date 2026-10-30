@@ -242,16 +242,9 @@ section.blk{margin-top:26px}
 
 .toast{position:fixed;left:50%;bottom:calc(var(--navh) + var(--minih) + 40px);transform:translateX(-50%);z-index:64;background:var(--fg);color:var(--ink);font-weight:700;padding:11px 18px;border-radius:999px;box-shadow:0 10px 30px rgba(0,0,0,.4);max-width:calc(100vw - 32px);text-align:center;animation:fade .2s}
 
-/* Lecteur YouTube : toujours visible (règle YouTube), à la place de la pochette ou en fenêtre flottante */
-.ytbox{position:fixed;z-index:65;background:#000;overflow:hidden;border:1px solid var(--stroke-2);box-shadow:0 14px 40px rgba(0,0,0,.6)}
-.ytbox #ytFrame,.ytbox iframe{width:100%;height:100%;border:0;display:block}
-.ytbox.dock{border-radius:14px}
-.ytbox.float{width:200px;height:200px;right:12px;bottom:calc(var(--navh) + var(--minih) + 34px);border-radius:10px}
-.ytbox.float.top{bottom:auto;top:64px}
-.yt-slot{width:100%;max-width:440px;aspect-ratio:16/11;min-height:220px;border-radius:14px;background:rgba(0,0,0,.45)}
-.yt-on .sheet{max-height:58vh}
-.yt-on .toast{bottom:auto;top:calc(64px + env(safe-area-inset-top,0px))} /* messages lisibles, jamais sous la vidéo */
-.yt-on main{padding-bottom:calc(var(--navh) + var(--minih) + 270px)}
+/* Lecteur YouTube : invisible, seul le son est joué (le cadre reste actif pour ne pas couper la lecture) */
+.ytbox{position:fixed;left:0;bottom:0;width:2px;height:2px;z-index:-1;opacity:.01;overflow:hidden;pointer-events:none;background:transparent;border:0}
+.ytbox #ytFrame,.ytbox iframe{width:200px;height:200px;border:0;display:block}
 .setup-list{display:grid;gap:10px;margin-top:16px}
 .tile.setup{background:rgba(255,255,255,.05);flex-direction:row;align-items:center;justify-content:flex-start;min-height:0;gap:14px}
 .tile.setup div{display:grid;gap:3px}
@@ -1154,22 +1147,9 @@ function useEngine(remote){
   layoutYT();
 }
 
-/* Position de la vidéo : à la place de la pochette dans le lecteur, sinon fenêtre flottante */
+/* Lecteur YouTube toujours caché : seul le son est joué */
 function layoutYT(){
-  const box = $('#ytBox');
-  const on = isYt() && !!YTE.player && YTE.q.length > 0;
-  document.body.classList.toggle('yt-on', on);
-  box.hidden = !on;
-  if (!on) return;
-  const slot = !$('#player').hidden && $('#plCover .yt-slot');
-  if (slot){
-    const r = slot.getBoundingClientRect();
-    box.className = 'ytbox dock';
-    Object.assign(box.style, { left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.height + 'px' });
-  } else {
-    box.className = 'ytbox float' + (!$('#sheet').hidden ? ' top' : '');
-    Object.assign(box.style, { left: '', top: '', width: '', height: '' });
-  }
+  $('#ytBox').hidden = false;
 }
 
 function playList(list, start = 0, shuffle = S.shuffle){
@@ -1341,9 +1321,7 @@ function openPlayer(){ if (!cur()) return; $('#player').hidden = false; paintPla
 function closePlayer(){ $('#player').hidden = true; layoutYT(); }
 function paintPlayer(){
   const t = cur(); if (!t) return;
-  const slot = $('#plCover .yt-slot');
-  if (isYt()){ if (!slot) $('#plCover').innerHTML = '<div class="yt-slot"></div>'; }
-  else $('#plCover').innerHTML = cover(t, t.album || t.title);
+  $('#plCover').innerHTML = cover(t, t.album || t.title);
   const bg = $('#plBg'), src = artOf(t);
   bg.style.display = src ? '' : 'none'; bg.onerror = () => bg.style.display = 'none'; if (src) bg.src = src; else bg.removeAttribute('src');
   $('#plTitle').textContent = t.title;
