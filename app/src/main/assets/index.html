@@ -389,6 +389,84 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:none;box-s
 .phone button[aria-pressed=true]{border-color:var(--v);background:#3a1220}
 .phone .tl{top:7px;left:7px}.phone .tr{top:7px;right:7px}.phone .bl{bottom:7px;left:7px}.phone .br{bottom:7px;right:7px}
 @media (prefers-reduced-motion:reduce){.nova-intro,.nova-intro *{animation-duration:1ms!important;animation-delay:0s!important}.billboard .bb-img{animation:none}}
+
+/* ======================================================================
+   Version télé (façon Deezer) : menu latéral, grandes rangées, focus télécommande
+   ====================================================================== */
+html.tv{--g:48px;--rail:124px;--navh:0px;--minih:0px}
+html.tv *{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+html.tv body{font-size:17px}
+html.tv body::before{animation:none}
+/* Menu latéral */
+html.tv .nav{left:0;top:0;bottom:0;right:auto;width:var(--rail);flex-direction:column;justify-content:flex-start;gap:8px;padding:110px 12px 24px;border:0;border-right:1px solid rgba(255,255,255,.08);background:linear-gradient(90deg,rgba(19,7,10,.98),rgba(19,7,10,.92))}
+html.tv .nav a{flex:none;padding:14px 4px;gap:7px;font-size:13px;border-radius:18px;color:var(--muted)}
+html.tv .nav a .i{width:28px;height:28px}
+html.tv .nav a.on{color:var(--fg);background:rgba(255,255,255,.08)}
+html.tv .nav a.on .i{color:var(--red)}
+/* Barre du haut : seulement le logo, au-dessus du menu */
+html.tv .top{position:fixed;left:0;top:0;width:var(--rail);background:none!important;padding:26px 0 0;justify-content:center;z-index:31}
+html.tv .brand{flex:none;padding:0;justify-content:center}
+html.tv .brand b{display:none}
+html.tv .brand svg{width:54px;height:54px}
+html.tv #topSearch,html.tv #topSettings,html.tv #topTitle{display:none!important}
+html.tv #backBtn{display:none!important}
+html.tv main{max-width:none;padding:36px var(--g) 140px calc(var(--rail) + var(--g))}
+html.tv .hello{font-size:38px;margin-top:4px}
+html.tv .blk-h h2{font-size:24px}
+html.tv section.blk{margin-top:38px}
+/* Vitrine */
+html.tv .billboard{margin:-36px calc(-1 * var(--g)) 0 calc(-1 * var(--g));min-height:52vh}
+html.tv .bb-in{padding:0 var(--g) 34px;max-width:900px;gap:16px}
+html.tv .bb-in h1{font-size:clamp(44px,5vw,72px)}
+html.tv .bb-in p{font-size:20px}
+html.tv .bb-cover{width:min(26vw,320px);top:auto;bottom:36px;right:calc(var(--g) + 20px)}
+/* Rangées plus grandes */
+html.tv .tshelf,html.tv .shelf{grid-auto-columns:200px;gap:22px;margin:0 calc(-1 * var(--g));padding:10px var(--g) 18px;scroll-padding-inline:var(--g)}
+html.tv .tcard b,html.tv .card b{font-size:16px}
+html.tv .tcard span,html.tv .card span{font-size:14px}
+html.tv .moods{grid-auto-columns:300px;gap:20px;margin:0 calc(-1 * var(--g));padding:10px var(--g) 14px}
+html.tv .mood{height:140px;padding:20px}
+html.tv .mood b{font-size:20px}
+html.tv .top10{margin:0 calc(-1 * var(--g));padding:10px var(--g) 18px;gap:26px}
+html.tv .t10 .tcard{width:180px}
+html.tv .t10 .num{font-size:190px;margin-bottom:46px}
+html.tv .grid{grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:26px 22px}
+html.tv .rows{max-width:1100px}
+html.tv .row{padding:10px 12px}
+/* Focus télécommande : bien visible, comme sur Deezer */
+html.tv :focus{outline:none}
+html.tv .tcard:focus .cover,html.tv .card:focus .cover{transform:scale(1.07);box-shadow:0 0 0 4px #fff,0 18px 50px rgba(200,57,90,.55)}
+html.tv .tcard,html.tv .card{transition:transform .2s}
+html.tv .tcard:focus,html.tv .card:focus,html.tv .tcard:focus-visible,html.tv .card:focus-visible{box-shadow:none!important}
+html.tv .tcard:focus b,html.tv .card:focus b{color:var(--t)}
+html.tv .tcard .cover,html.tv .card .cover{transition:transform .2s,box-shadow .2s}
+html.tv .mood:focus,html.tv .tile:focus{transform:scale(1.05);box-shadow:0 0 0 4px #fff,0 16px 44px rgba(0,0,0,.6)}
+html.tv .row:focus{background:rgba(255,255,255,.1);box-shadow:inset 0 0 0 3px rgba(255,255,255,.85)}
+html.tv .btn:focus,html.tv .ib:focus,html.tv .play-big:focus,html.tv .round:focus,html.tv .seg button:focus,html.tv .vopt:focus,html.tv .link:focus{box-shadow:0 0 0 4px #fff,0 0 28px rgba(200,57,90,.6);transform:scale(1.06)}
+html.tv .nav a:focus{background:var(--fg);color:var(--ink)}
+html.tv .nav a:focus .i{color:var(--ink)}
+html.tv input:focus{box-shadow:0 0 0 4px #fff}
+/* Mini-lecteur : en bas à droite */
+html.tv .mini{left:auto;right:var(--g);bottom:28px;width:min(480px,40vw);margin:0}
+/* Lecteur plein écran : vidéo à gauche, infos et commandes à droite */
+html.tv .pl-in{max-width:none;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(320px,1fr);grid-template-rows:auto 1fr auto auto auto auto;column-gap:56px;row-gap:22px;padding:34px 64px 44px}
+html.tv .pl-top{grid-column:1 / -1;margin:0}
+html.tv .pl-cover{grid-column:1;grid-row:2 / 7;align-self:center}
+html.tv .pl-cover .cover{width:min(100%,62vh)}
+html.tv .yt-slot{max-width:none;width:100%;aspect-ratio:16/9;min-height:0}
+html.tv .pl-meta,html.tv .pl-seek,html.tv .pl-ctrl,html.tv .pl-foot{grid-column:2}
+html.tv .pl-meta{align-self:end}
+html.tv .pl-txt h2{font-size:34px;white-space:normal}
+html.tv .pl-txt .link{font-size:20px}
+html.tv .pl-ctrl{justify-content:flex-start;gap:18px}
+html.tv .play-big{width:88px;height:88px}
+/* Feuilles (menu d'un titre, file d'attente) : panneau à droite */
+html.tv .sheet{left:auto;top:0;bottom:0;width:min(560px,44vw);max-height:none;border-radius:0;border:0;border-left:1px solid var(--stroke-2);animation:none;margin:0}
+html.tv .sheet::before{display:none}
+/* Fenêtre vidéo flottante : format 16:9 sur la télé */
+html.tv .ytbox.float{width:356px;height:222px}
+html.tv .tv-hint{position:fixed;left:calc(var(--rail) + var(--g));bottom:28px;z-index:28;font-size:13px;color:var(--faint);display:flex;gap:18px}
+html.tv .tv-hint b{color:var(--muted)}
 </style>
 </head>
 <body>
@@ -682,6 +760,7 @@ function render(y = 0){
   window.scrollTo(0, y);
 }
 function afterRender(){
+  if (window.IS_TV_READY) setTimeout(() => { $$('#main .tcard, #main .row[data-list], #main .mood').forEach(el => el.tabIndex = 0); const ae = document.activeElement; if (!ae || ae === document.body || !ae.isConnected || ae.closest('[hidden]')) tvFocusFirst(); }, 60);
   $$('[data-lazy]').forEach(mountLazy);
   if (S.view === 'search'){ const i = $('#q'); if (i){ i.value = S.query; if (!S.query) setTimeout(() => i.focus(), 50); } if (S.query) runYtSearch(); }
   if (S.view === 'profile') loadStats();
@@ -1361,8 +1440,9 @@ function useEngine(remote){
 S.video = Object.assign({ mode: 'float', corner: 'br', frame: true }, store.get('video', {}));
 const saveVideo = () => store.set('video', S.video);
 function floatPos(corner){
-  const W = 200, H = 222, m = 12, vw = window.innerWidth, vh = window.innerHeight;
-  const topY = 66 + m, botY = vh - (parseInt(getComputedStyle(document.documentElement).getPropertyValue('--navh')) || 66) - 64 - 30 - H;
+  const tv = document.documentElement.classList.contains('tv');
+  const W = tv ? 356 : 200, H = 222, m = tv ? 48 : 12, vw = window.innerWidth, vh = window.innerHeight;
+  const topY = tv ? 36 : 66 + m, botY = tv ? vh - 28 - 84 - 18 - H : vh - (parseInt(getComputedStyle(document.documentElement).getPropertyValue('--navh')) || 66) - 64 - 30 - H;
   let c = corner;
   if (!$('#sheet').hidden && c[0] === 'b') c = 't' + c[1]; // une feuille ouverte en bas : la vidéo monte
   return { left: c[1] === 'l' ? m : vw - W - m, top: c[0] === 't' ? topY : Math.max(topY, botY) };
@@ -1639,11 +1719,12 @@ function markPlaying(){
 }
 
 /* Lecteur plein écran */
-function openPlayer(){ if (!cur()) return; $('#player').hidden = false; paintPlayer(); progress(); layoutYT(); setTimeout(layoutYT, 320); }
+function openPlayer(){ if (!cur()) return; $('#player').hidden = false; paintPlayer(); progress(); layoutYT(); setTimeout(layoutYT, 320); if (window.IS_TV_READY) setTimeout(() => tvFocus($('#btnPlay')), 80); }
 function closePlayer(){
   $('#player').hidden = true;
   if (isYt() && S.video.mode === 'player' && (YTE.wantPlay || YTE.st === 1)){ YTE.pause(); S.p.p = false; paintPlay(); toast('Pause : la vidéo ne s\'affiche que dans le lecteur'); }
   layoutYT();
+  if (window.IS_TV_READY) setTimeout(tvFocusFirst, 60);
 }
 function paintPlayer(){
   const t = cur(); if (!t) return;
@@ -1682,8 +1763,8 @@ function bindSeek(){
 /* ======================================================================
    Feuilles : menu d'un titre, file d'attente
    ====================================================================== */
-function openSheet(html, name){ S.sheet = name; $('#sheetBody').innerHTML = html; $('#sheet').hidden = false; markPlaying(); layoutYT(); }
-function closeSheet(){ $('#sheet').hidden = true; S.sheet = null; layoutYT(); }
+function openSheet(html, name){ S.sheet = name; $('#sheetBody').innerHTML = html; $('#sheet').hidden = false; markPlaying(); layoutYT(); if (window.IS_TV_READY) setTimeout(() => { $$('#sheetBody .row[data-q]').forEach(el => el.tabIndex = 0); tvFocus($('#sheetBody .mi, #sheetBody .row[data-q], #sheetBody button')); }, 60); }
+function closeSheet(){ $('#sheet').hidden = true; S.sheet = null; layoutYT(); if (window.IS_TV_READY) setTimeout(tvFocusFirst, 60); }
 function trackMenu(t){
   if (!t || (!t.remote && !S.byId.has(t.id))) return;
   S.menuTrack = t;
@@ -2062,6 +2143,89 @@ function startScan(){
 /* ======================================================================
    Démarrage
    ====================================================================== */
+/* ======================================================================
+   Télécommande (télé) : déplacement au plus proche, OK, Retour, touches média
+   ====================================================================== */
+const IS_TV = !!(window.__tv || (N && N.isTv && N.isTv()));
+if (IS_TV) document.documentElement.classList.add('tv');
+const FOCUSABLE = 'button:not([disabled]), a[data-go], input, select, .row[data-list], .tcard, .mood, [role=button][tabindex]';
+function tvLayer(){
+  if (!$('#sheet').hidden) return $('#sheet');
+  if (!$('#player').hidden) return $('#player');
+  return $('#shell');
+}
+function tvFocusables(){
+  return $$(FOCUSABLE, tvLayer()).filter(el => {
+    if (el.disabled || el.closest('[hidden]')) return false;
+    const r = el.getBoundingClientRect();
+    return r.width > 1 && r.height > 1;
+  });
+}
+function tvFocus(el, block = 'nearest'){
+  if (!el) return;
+  if (!el.hasAttribute('tabindex') && !el.matches('button, input, select, a[href]')) el.setAttribute('tabindex', '0'); // liens du menu et cartes : atteignables à la télécommande
+  el.focus({ preventScroll: true });
+  if (!el.closest('.nav')) el.scrollIntoView({ block, inline: 'nearest', behavior: 'smooth' });
+}
+function tvMove(dir){
+  const els = tvFocusables();
+  const cur = document.activeElement;
+  if (!cur || cur === document.body || !els.includes(cur)){ tvFocusFirst(); return; }
+  const r = cur.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+  const horiz = dir === 'left' || dir === 'right';
+  let best = null, bs = Infinity;
+  for (const el of els){
+    if (el === cur) continue;
+    const b = el.getBoundingClientRect(), x = b.left + b.width / 2, y = b.top + b.height / 2;
+    let main;
+    if (dir === 'right'){ if (x <= cx + 1) continue; main = Math.max(0, b.left - r.right); }
+    else if (dir === 'left'){ if (x >= cx - 1) continue; main = Math.max(0, r.left - b.right); }
+    else if (dir === 'down'){ if (y <= cy + 1) continue; main = Math.max(0, b.top - r.bottom); }
+    else { if (y >= cy - 1) continue; main = Math.max(0, r.top - b.bottom); }
+    const cross = horiz ? Math.max(0, b.top - r.bottom, r.top - b.bottom) : Math.max(0, b.left - r.right, r.left - b.right);
+    const score = main + cross * 4 + (horiz ? Math.abs(y - cy) : Math.abs(x - cx)) * 0.15;
+    if (score < bs){ bs = score; best = el; }
+  }
+  if (best) tvFocus(best, horiz ? 'nearest' : 'center');
+}
+function tvFocusFirst(){
+  const layer = tvLayer();
+  if (layer === $('#player')) return tvFocus($('#btnPlay'));
+  const first = $('#main .bb-acts .btn, #main .mood, #main .tcard, #main .row[data-list], #main button, #main input', layer) || $('.nav a.on');
+  tvFocus(first, 'center');
+}
+document.addEventListener('keydown', e => {
+  if (!IS_TV && !e.target.closest('.tcard, .row, .mood')) return;
+  const dir = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right' }[e.key];
+  if (dir && IS_TV){
+    const ae = document.activeElement;
+    if (ae && ae.matches('input[type=search], input[type=text], input[type=password]') && (dir === 'left' || dir === 'right')){
+      try { const p = ae.selectionStart, n = ae.value.length; if ((dir === 'left' && p > 0) || (dir === 'right' && p < n)) return; } catch (_) {}
+    }
+    if (ae && ae.id === 'seek' && (dir === 'left' || dir === 'right')){
+      e.preventDefault(); const d = S.p.dur || 0; E && E.seek(Math.max(0, (S.p.pos || 0) + (dir === 'right' ? 10000 : -10000))); if (d) S.p.pos = Math.min(d, (S.p.pos || 0) + (dir === 'right' ? 10000 : -10000)); return;
+    }
+    e.preventDefault(); tvMove(dir); return;
+  }
+  // OK / Entrée sur une carte, une ligne ou une tuile = toucher
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('.tcard, .row[data-list], .mood, a[data-go], [role=button][tabindex]') && e.target.id !== 'ytGrip'){
+    e.preventDefault(); e.target.click();
+  }
+});
+/* Touches média de la télécommande (envoyées par Android) */
+window.novaKey = k => {
+  if (!E && k !== 'menu') return;
+  if (k === 'playpause') togglePlay();
+  else if (k === 'play'){ if (!S.p.p) togglePlay(); }
+  else if (k === 'pause'){ if (S.p.p) togglePlay(); }
+  else if (k === 'next') E.next();
+  else if (k === 'prev') E.previous();
+  else if (k === 'ff' || k === 'rew') E.seek(Math.max(0, (S.p.pos || 0) + (k === 'ff' ? 15000 : -15000)));
+  else if (k === 'menu'){ const t = document.activeElement; const r = t && t.closest('.row[data-list], .tcard[data-list]'); if (r){ const list = S.lists.get(r.dataset.list); trackMenu(list && list[+r.dataset.i]); } else if (cur()) openPlayer(); }
+};
+
+window.IS_TV_READY = IS_TV;
+if (IS_TV) $$('.nav a, #brand').forEach(el => el.setAttribute('tabindex', '0'));
 startIntro();
 bindSeek();
 setShuffle(S.shuffle);

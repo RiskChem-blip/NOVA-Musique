@@ -17,6 +17,9 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.app.UiModeManager
+import android.content.res.Configuration
+import android.view.KeyEvent
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
@@ -322,6 +325,32 @@ class MainActivity : ComponentActivity() {
         null
     }
 
+    private fun isTv(): Boolean {
+        val ui = getSystemService(android.content.Context.UI_MODE_SERVICE) as UiModeManager
+        return ui.currentModeType == Configuration.UI_MODE_TYPE_TELEVISION ||
+            packageManager.hasSystemFeature("android.software.leanback")
+    }
+
+    /** Touches média de la télécommande : transmises à l'interface (lecteur YouTube ou fichiers). */
+    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
+        val action = when (keyCode) {
+            KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE, KeyEvent.KEYCODE_HEADSETHOOK -> "playpause"
+            KeyEvent.KEYCODE_MEDIA_PLAY -> "play"
+            KeyEvent.KEYCODE_MEDIA_PAUSE -> "pause"
+            KeyEvent.KEYCODE_MEDIA_NEXT -> "next"
+            KeyEvent.KEYCODE_MEDIA_PREVIOUS -> "prev"
+            KeyEvent.KEYCODE_MEDIA_FAST_FORWARD -> "ff"
+            KeyEvent.KEYCODE_MEDIA_REWIND -> "rew"
+            KeyEvent.KEYCODE_MENU -> "menu"
+            else -> null
+        }
+        if (action != null) {
+            js("window.novaKey && novaKey('$action')")
+            return true
+        }
+        return super.onKeyDown(keyCode, event)
+    }
+
     // ---------- Permission ----------
 
     private fun audioPermission(): String =
@@ -560,6 +589,10 @@ class MainActivity : ComponentActivity() {
         fun setYoutubeKey(key: String) {
             Scrobbler.prefs(this@MainActivity).edit().putString("yt_key", key.trim()).apply()
         }
+
+        /** Télé (Android TV / Google TV) : l'interface passe en mode télécommande. */
+        @JavascriptInterface
+        fun isTv(): Boolean = this@MainActivity.isTv()
 
         // Divers
         @JavascriptInterface
