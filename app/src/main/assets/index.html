@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;700&family=Manrope:wght@400;500;600;700;800&display=swap">
 <style>
-/* Nova Musique : même famille que Nova (verre dépoli, pilule flottante), thème Bordeaux : rouge vin et crème. */
+/* Nova Musique : même famille que Nova STREAM (verre dépoli, intro Supernova, vitrine, Top 10), thème Bordeaux : rouge vin et crème. */
 :root{
   --ink:#13070a; --ink-2:#1c0b0f; --glass:rgba(38,17,22,.66); --stroke:rgba(255,255,255,.08); --stroke-2:rgba(255,255,255,.16);
   --fg:#fbf1ec; --muted:#b99a9c; --faint:#7d6266;
@@ -242,9 +242,16 @@ section.blk{margin-top:26px}
 
 .toast{position:fixed;left:50%;bottom:calc(var(--navh) + var(--minih) + 40px);transform:translateX(-50%);z-index:64;background:var(--fg);color:var(--ink);font-weight:700;padding:11px 18px;border-radius:999px;box-shadow:0 10px 30px rgba(0,0,0,.4);max-width:calc(100vw - 32px);text-align:center;animation:fade .2s}
 
-/* Lecteur YouTube : invisible, seul le son est joué (le cadre reste actif pour ne pas couper la lecture) */
-.ytbox{position:fixed;left:0;bottom:0;width:2px;height:2px;z-index:-1;opacity:.01;overflow:hidden;pointer-events:none;background:transparent;border:0}
-.ytbox #ytFrame,.ytbox iframe{width:200px;height:200px;border:0;display:block}
+/* Lecteur YouTube : toujours visible (règle YouTube), à la place de la pochette ou en fenêtre flottante */
+.ytbox{position:fixed;z-index:65;background:#000;overflow:hidden;border:1px solid var(--stroke-2);box-shadow:0 14px 40px rgba(0,0,0,.6)}
+.ytbox #ytFrame,.ytbox iframe{width:100%;height:100%;border:0;display:block}
+.ytbox.dock{border-radius:14px}
+.ytbox.float{width:200px;height:200px;right:12px;bottom:calc(var(--navh) + var(--minih) + 34px);border-radius:10px}
+.ytbox.float.top{bottom:auto;top:64px}
+.yt-slot{width:100%;max-width:440px;aspect-ratio:16/11;min-height:220px;border-radius:14px;background:rgba(0,0,0,.45)}
+.yt-on .sheet{max-height:58vh}
+.yt-on .toast{bottom:auto;top:calc(64px + env(safe-area-inset-top,0px))} /* messages lisibles, jamais sous la vidéo */
+.yt-on main{padding-bottom:calc(var(--navh) + var(--minih) + 270px)}
 .setup-list{display:grid;gap:10px;margin-top:16px}
 .tile.setup{background:rgba(255,255,255,.05);flex-direction:row;align-items:center;justify-content:flex-start;min-height:0;gap:14px}
 .tile.setup div{display:grid;gap:3px}
@@ -257,6 +264,131 @@ section.blk{margin-top:26px}
 .acc-h .badge.yt{background:#ff0033;color:#fff}
 .acc-h .badge.yt .i{width:18px;height:18px}
 .steps-help{padding-left:18px;margin:0;display:grid;gap:6px}
+
+/* ======================================================================
+   Refonte « famille Nova STREAM » : texture, intro Supernova, barre haute,
+   vitrine, envies, Top 10, carrousels — aux couleurs Bordeaux
+   ====================================================================== */
+body{background-color:var(--ink);background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.07 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>")}
+::selection{background:var(--v);color:#fff}
+.text-grad{background:linear-gradient(120deg,#ff6b86,#f2d7b6);-webkit-background-clip:text;background-clip:text;color:transparent}
+.glass{background:rgba(38,17,22,.55);border:1px solid rgba(255,255,255,.09);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:999px;font-size:12px;font-weight:700;color:rgba(251,241,236,.88);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13)}
+.chip.hot{background:var(--grad);border:0;color:#fff}
+button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:none;box-shadow:0 0 0 3px #fff,0 0 26px rgba(200,57,90,.6)}
+
+/* Barre du haut */
+.top{padding:calc(8px + env(safe-area-inset-top,0px)) var(--g) 8px calc(var(--g) - 6px);transition:background .25s}
+.top.scrolled{background:rgba(19,7,10,.86);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+.brand{display:flex;align-items:center;gap:10px;flex:1;min-width:0;padding-left:6px}
+.brand svg{width:38px;height:38px;filter:drop-shadow(0 8px 22px rgba(200,57,90,.45));flex:none}
+.brand b{font:700 20px/1 var(--f-display);letter-spacing:-.03em}
+.brand small{font:700 9.5px var(--f-body);letter-spacing:.28em;color:var(--t);margin-left:6px;vertical-align:middle}
+.round{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:var(--fg);flex:none;transition:background .2s,transform .2s}
+.round.on{background:var(--fg)!important;color:var(--ink)}
+.round .i{width:19px;height:19px}
+
+/* Barre du bas pleine largeur, comme Nova STREAM */
+.nav{left:0;right:0;bottom:0;border-radius:0;max-width:none;padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px));background:rgba(19,7,10,.92);border:0;border-top:1px solid rgba(255,255,255,.09);box-shadow:none}
+.nav a{border-radius:12px;font-size:10.5px}
+.nav a.on{background:none;color:var(--red)}
+.nav a.on .i{color:var(--red)}
+.mini{bottom:calc(var(--navh) + 8px + env(safe-area-inset-bottom,0px))}
+
+/* Vitrine */
+.billboard{position:relative;margin:calc(-62px - env(safe-area-inset-top,0px)) calc(-1 * var(--g)) 0;min-height:clamp(340px,92vw,460px);display:flex;align-items:flex-end;overflow:hidden}
+.billboard .bb-img{position:absolute;inset:-8%;width:116%;height:116%;object-fit:cover;filter:blur(2px) saturate(1.2);opacity:.85;animation:bbZoom 18s ease-in-out infinite alternate}
+@keyframes bbZoom{to{transform:scale(1.08) translate3d(-2%,1%,0)}}
+.billboard .bb-fallback{position:absolute;inset:0;background:radial-gradient(60% 70% at 70% 30%,rgba(200,57,90,.55),transparent 70%),radial-gradient(50% 60% at 15% 80%,rgba(242,215,182,.18),transparent 70%)}
+.billboard::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,var(--ink) 4%,rgba(19,7,10,.55) 45%,rgba(19,7,10,.15)),linear-gradient(to right,rgba(19,7,10,.8),transparent 70%)}
+.bb-in{position:relative;z-index:1;padding:0 var(--g) 22px;display:grid;gap:12px;max-width:560px}
+.bb-in h1{font:700 clamp(28px,8.5vw,44px)/1.04 var(--f-display);letter-spacing:-.04em;margin:0;text-wrap:balance}
+.bb-in p{margin:-4px 0 0;color:var(--muted);font-size:15px;font-weight:600}
+.bb-cover{position:absolute;right:var(--g);top:76px;z-index:1;width:min(38vw,170px);transform:rotate(4deg);box-shadow:0 30px 70px rgba(0,0,0,.6)}
+.bb-acts{display:flex;gap:10px;flex-wrap:wrap}
+
+/* Envies */
+.moods{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(190px,46%);gap:12px;overflow-x:auto;margin:0 calc(-1 * var(--g));padding:0 var(--g) 4px;scrollbar-width:none}
+.moods::-webkit-scrollbar{display:none}
+.mood{position:relative;overflow:hidden;height:104px;border-radius:18px;padding:14px;text-align:left;border:1px solid rgba(255,255,255,.1);display:flex;flex-direction:column;justify-content:flex-end;transition:transform .2s,border-color .2s}
+.mood:active{transform:scale(.97)}
+.mood b{position:relative;font:700 15.5px/1.15 var(--f-display);letter-spacing:-.02em;max-width:78%}
+.mood span{position:relative;margin-top:3px;font-size:12px;font-weight:700}
+.mood .i{position:absolute;right:-8px;bottom:-10px;width:72px;height:72px;opacity:.28;stroke-width:1.6}
+
+/* Top 10 */
+.top10{display:flex;gap:18px;overflow-x:auto;overflow-y:hidden;margin:0 calc(-1 * var(--g));padding:4px var(--g) 8px;scrollbar-width:none}
+.top10::-webkit-scrollbar{display:none}
+.t10{display:flex;align-items:flex-end;flex:none;cursor:pointer}
+.t10 .num{font:700 132px/.78 var(--f-display);letter-spacing:-.08em;margin:0 -6px 40px 0;color:var(--ink);-webkit-text-stroke:3px rgba(242,215,182,.78);paint-order:stroke fill;user-select:none;position:relative;z-index:0}
+.t10 .tcard{position:relative;z-index:1;width:118px}
+.badge10{display:inline-block;padding:3px 8px;border-radius:7px;background:var(--grad);color:#fff;font:700 11.5px var(--f-body);letter-spacing:.06em;margin-right:8px;vertical-align:3px}
+
+/* Cartes titres (carrousels) */
+.tshelf{display:grid;grid-auto-flow:column;grid-auto-columns:132px;gap:14px;overflow-x:auto;margin:0 calc(-1 * var(--g));padding:0 var(--g) 6px;scrollbar-width:none;scroll-snap-type:x mandatory}
+.tshelf::-webkit-scrollbar{display:none}
+.tcard{display:grid;gap:7px;min-width:0;cursor:pointer;scroll-snap-align:start;text-align:left}
+.tcard .cover{transition:transform .2s,box-shadow .2s}
+.tcard:active .cover{transform:scale(.96)}
+.tcard b{font-size:13.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tcard span{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:-5px}
+.tcard.on b{color:var(--t)}
+.tcard.on .cover{box-shadow:0 0 0 2px var(--v),0 14px 34px rgba(200,57,90,.35)}
+
+/* Intro « Supernova » */
+.nova-intro{position:fixed;inset:0;z-index:200;overflow:hidden;cursor:pointer;display:flex;align-items:center;justify-content:center;background:var(--ink);contain:strict}
+.nova-intro canvas{position:absolute;inset:0;width:100%;height:100%}
+.nova-intro .core,.nova-intro .flash,.nova-intro .ring,.nova-intro .aura,.nova-intro .nlogo{position:absolute;pointer-events:none;opacity:0;will-change:transform,opacity}
+.nova-intro .core{width:34vmin;height:34vmin;border-radius:50%;transform:scale(.2);background:radial-gradient(circle,rgba(255,255,255,.95) 0%,rgba(242,215,182,.8) 14%,rgba(255,107,134,.4) 32%,rgba(200,57,90,0) 70%)}
+.nova-intro .flash{width:64vmax;height:64vmax;border-radius:50%;transform:scale(.4);background:radial-gradient(circle,#fff 0%,#f2d7b6 10%,rgba(255,107,134,.8) 22%,rgba(200,57,90,.5) 38%,rgba(19,7,10,0) 60%)}
+.nova-intro .ring{width:22vmin;height:22vmin;border-radius:50%;transform:scale(.05);background:radial-gradient(circle,transparent 58%,rgba(242,215,182,.95) 64%,rgba(200,57,90,.55) 69%,transparent 75%)}
+.nova-intro .ring.r2{background:radial-gradient(circle,transparent 60%,rgba(200,57,90,.85) 66%,rgba(255,107,134,.35) 71%,transparent 76%)}
+.nova-intro .aura{width:60vmin;height:60vmin;border-radius:50%;transform:scale(.4);background:radial-gradient(circle,rgba(200,57,90,.38),rgba(242,215,182,.1) 45%,transparent 70%)}
+.nova-intro .nlogo{position:relative;display:grid;justify-items:center;gap:14px;transform:scale(2.4)}
+.nova-intro .nlogo svg{width:clamp(110px,26vmin,180px);height:auto;overflow:visible}
+.nova-intro .nlogo b{font:700 26px/1 var(--f-display);letter-spacing:-.03em;color:var(--fg)}
+.nova-intro .nlogo b small{font:700 11px var(--f-body);letter-spacing:.3em;color:var(--t);margin-left:8px;vertical-align:middle}
+.nova-intro.run .core{animation:nvCore 1.45s cubic-bezier(.5,0,.9,.6) forwards}
+.nova-intro.run .flash{animation:nvFlash .8s cubic-bezier(.2,.7,.3,1) 1.28s forwards}
+.nova-intro.run .ring{animation:nvRing 1s cubic-bezier(.1,.7,.3,1) 1.3s forwards}
+.nova-intro.run .ring.r2{animation-delay:1.45s;animation-duration:1.2s}
+.nova-intro.run .aura{animation:nvAura 1.4s ease-out 1.35s forwards}
+.nova-intro.run .nlogo{animation:nvBirth .7s cubic-bezier(.16,1,.3,1) 1.34s forwards,nvRise .7s cubic-bezier(.65,0,.35,1) 2.6s forwards}
+.nova-intro.run{animation:nvOut .6s cubic-bezier(.4,0,.2,1) 2.8s forwards}
+.nova-intro.skip{animation:nvOut .25s ease-in forwards!important}
+@keyframes nvCore{0%{opacity:0;transform:scale(.2)}70%{opacity:.9}100%{opacity:1;transform:scale(1.15)}}
+@keyframes nvFlash{0%{opacity:0;transform:scale(.4)}18%{opacity:1;transform:scale(1.5)}100%{opacity:0;transform:scale(2.5)}}
+@keyframes nvRing{0%{opacity:1;transform:scale(.05)}100%{opacity:0;transform:scale(7)}}
+@keyframes nvAura{0%{opacity:0;transform:scale(.4)}30%{opacity:1;transform:scale(1.1)}100%{opacity:.7;transform:scale(1)}}
+@keyframes nvBirth{0%{opacity:0;transform:scale(2.4)}35%{opacity:1}100%{opacity:1;transform:scale(1)}}
+@keyframes nvRise{from{opacity:1;transform:scale(1)}to{opacity:0;transform:translateY(-26vh) scale(.32)}}
+@keyframes nvOut{to{opacity:0;visibility:hidden}}
+.page-in{animation:pageIn .45s cubic-bezier(.22,1,.36,1)}
+@keyframes pageIn{from{opacity:0;transform:translateY(14px)}}
+
+/* Lecteur YouTube : visible, intégré, fenêtre flottante déplaçable */
+.ytbox.framed{border:2px solid var(--v)}
+.ytbox.float{width:200px;height:222px;right:auto;bottom:auto;border-radius:14px;display:flex;flex-direction:column;transition:left .25s cubic-bezier(.22,1,.36,1),top .25s cubic-bezier(.22,1,.36,1)}
+.ytbox.float.top{top:auto}
+.ytbox.float.dragging{transition:none}
+.ytbox .grip{height:22px;flex:none;display:none;align-items:center;justify-content:center;background:#210f13;cursor:grab;touch-action:none}
+.ytbox .grip i{width:34px;height:4px;border-radius:2px;background:rgba(255,255,255,.45)}
+.ytbox.float .grip{display:flex}
+.ytbox.float #ytFrame{flex:1;height:auto}
+.ytbox.dock #ytFrame{height:100%}
+.yt-on main{padding-bottom:calc(var(--navh) + var(--minih) + 290px)}
+.vopt{display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;border-radius:14px;border:1px solid rgba(255,255,255,.1);text-align:left}
+.vopt[aria-checked=true]{border-color:var(--v);background:rgba(200,57,90,.14)}
+.vopt .dot{width:18px;height:18px;border-radius:50%;border:2px solid var(--faint);background:var(--fg);flex:none}
+.vopt[aria-checked=true] .dot{border:6px solid var(--v)}
+.vopt b{display:block;font-size:14.5px}
+.vopt span{font-size:12.5px;color:var(--muted)}
+.corners{display:flex;gap:14px;align-items:center}
+.phone{width:104px;height:176px;border-radius:16px;border:2px solid rgba(255,255,255,.16);position:relative;flex:none}
+.phone button{position:absolute;width:40px;height:40px;border-radius:8px;border:2px solid rgba(255,255,255,.18)}
+.phone button[aria-pressed=true]{border-color:var(--v);background:#3a1220}
+.phone .tl{top:7px;left:7px}.phone .tr{top:7px;right:7px}.phone .bl{bottom:7px;left:7px}.phone .br{bottom:7px;right:7px}
+@media (prefers-reduced-motion:reduce){.nova-intro,.nova-intro *{animation-duration:1ms!important;animation-delay:0s!important}.billboard .bb-img{animation:none}}
 </style>
 </head>
 <body>
@@ -305,9 +437,12 @@ section.blk{margin-top:26px}
 
 <!-- Appli -->
 <div id="shell" hidden>
-  <header class="top">
+  <header class="top" id="top">
     <button class="ib" id="backBtn" data-act="back" aria-label="Retour" hidden><svg class="i"><use href="#i-back"/></svg></button>
-    <h1 id="topTitle">Nova Musique</h1>
+    <a class="brand" id="brand" data-go="home" aria-label="Nova Musique, accueil"><svg aria-hidden="true"><use href="#i-wave"/></svg><b>nova<small>MUSIQUE</small></b></a>
+    <h1 id="topTitle" hidden></h1>
+    <button class="round glass" id="topSearch" data-go="search" aria-label="Rechercher"><svg class="i"><use href="#i-search"/></svg></button>
+    <button class="round glass" id="topSettings" data-go="profile" aria-label="Comptes et réglages"><svg class="i"><use href="#i-user"/></svg></button>
   </header>
   <main id="main"></main>
 
@@ -360,7 +495,14 @@ section.blk{margin-top:26px}
 </section>
 
 <div id="sheet" class="sheet-wrap" hidden><div class="sheet-bg" data-act="closeSheet"></div><div class="sheet" id="sheetBody"></div></div>
-<div id="ytBox" class="ytbox" hidden><div id="ytFrame"></div></div>
+<div id="ytBox" class="ytbox" hidden><div class="grip" id="ytGrip" role="button" tabindex="0" aria-label="Déplacer la vidéo"><i></i></div><div id="ytFrame"></div></div>
+
+<!-- Intro « Supernova » (une fois par session, touche l'écran pour passer) -->
+<div id="intro" class="nova-intro" hidden aria-hidden="true">
+  <canvas id="introStars"></canvas>
+  <div class="aura"></div><div class="core"></div><div class="flash"></div><div class="ring"></div><div class="ring r2"></div>
+  <div class="nlogo"><svg viewBox="12 14 84 80"><use href="#i-wave"/></svg><b>nova<small>MUSIQUE</small></b></div>
+</div>
 <div id="toast" class="toast" hidden></div>
 
 <script>
@@ -526,9 +668,16 @@ function render(y = 0){
   const v = S.view, main = $('#main');
   const root = ROOTS.includes(v) ? v : (S.stack.find(s => ROOTS.includes(s.view)) || { view: 'home' }).view;
   $$('#nav a').forEach(a => a.classList.toggle('on', a.dataset.go === root));
-  $('#backBtn').hidden = !S.stack.length;
-  $('#topTitle').textContent = TITLES[v] || '';
-  main.innerHTML = ({ home: vHome, search: vSearch, library: vLibrary, album: vAlbum, artist: vArtist, artistTracks: vArtistTracks, profile: vProfile, rlist: vRemoteList, playlist: vPlaylist }[v] || vHome)();
+  const sub = !!S.stack.length;
+  $('#backBtn').hidden = !sub;
+  $('#brand').hidden = sub;
+  $('#topTitle').hidden = !sub;
+  $('#topTitle').textContent = sub ? (TITLES[v] || '') : '';
+  $('#topSearch').classList.toggle('on', v === 'search');
+  $('#topSettings').classList.toggle('on', v === 'profile');
+  main.classList.remove('page-in'); void main.offsetWidth; main.classList.add('page-in');
+  const pageTitle = { library: 'Bibliothèque', profile: 'Comptes' }[v];
+  main.innerHTML = (pageTitle ? `<h1 class="hello">${pageTitle}</h1>` : '') + ({ home: vHome, search: vSearch, library: vLibrary, album: vAlbum, artist: vArtist, artistTracks: vArtistTracks, profile: vProfile, rlist: vRemoteList, playlist: vPlaylist }[v] || vHome)();
   afterRender();
   window.scrollTo(0, y);
 }
@@ -590,23 +739,22 @@ function vHome(){
   const hello = h < 5 ? 'Bonne nuit' : h < 18 ? 'Bonjour' : 'Bonsoir';
   const a = S.acc || {}, accOK = !!((a.lfm && a.lfm.connected) || (a.lb && a.lb.connected)), keyOK = !!ytKey();
   if (accOK && !S.remote.at) loadRemote();
-  let html = `<div class="hello">${hello}</div>`;
+  const R = S.remote || {};
+  let html = billboardHTML(hello, accOK);
   const setup = [];
   if (!accOK) setup.push(`<button class="tile setup" data-go="profile">${ic('user')}<div><b>Connecte tes comptes</b><span>ListenBrainz ou Last.fm : tes écoutes, tops et recommandations arrivent ici.</span></div></button>`);
   if (!keyOK) setup.push(`<button class="tile setup" data-go="profile">${ic('play', 1)}<div><b>Ajoute ta clé YouTube</b><span>Elle permet de lire tes titres. Gratuite, 5 minutes.</span></div></button>`);
   if (setup.length) html += `<div class="setup-list">${setup.join('')}</div>`;
   if (accOK){
-    const R = S.remote, pool = remotePool();
-    html += `<div class="hero">
-      <button class="tile mix" data-act="mixRemote">${ic('shuffle')}<div><b>Mon mix</b><br><span>${pool.length ? plural(pool.length, 'titre') : 'Tes titres préférés'}</span></div></button>
-      <button class="tile fav" data-go="library:favoris">${ic('heart')}<div><b>Favoris</b><br><span>${plural(favList().length, 'titre')}</span></div></button></div>`;
+    html += blk('Quelle envie ?', moodsHTML());
     if (!R.at) html += `<div class="empty"><div class="spin"></div><span>Chargement de tes comptes…</span></div>`;
     else {
-      const more = (k, n) => n > 6 ? `<button class="link" data-go="rlist:${k}">Tout voir (${n})</button>` : '';
+      const more = (k, n) => n > 10 ? `<button class="link" data-go="rlist:${k}">Tout voir (${n})</button>` : '';
+      if (R.top.length) html += top10HTML(R.top);
+      if (R.recent.length) html += blk('Écoutés récemment', tshelfHTML(R.recent.slice(0, 20)), more('recent', R.recent.length));
       if (R.forYou.length) html += blk('Pour toi', `<div class="shelf">${R.forYou.map(plCard).join('')}</div>`);
-      if (R.recent.length) html += blk('Écoutés récemment', rowsHTML(R.recent.slice(0, 6)), more('recent', R.recent.length));
-      if (R.top.length) html += blk('Tes titres du mois', rowsHTML(R.top.slice(0, 6)), more('top', R.top.length));
-      if (R.loved.length) html += blk('Titres aimés', rowsHTML(R.loved.slice(0, 6)), more('loved', R.loved.length));
+      if (R.loved.length) html += blk('Titres aimés', tshelfHTML(R.loved.slice(0, 20)), more('loved', R.loved.length));
+      if (R.top.length > 10) html += blk('Le reste de ton mois', rowsHTML(R.top.slice(10, 16)), more('top', R.top.length));
       if (R.mine.length) html += blk('Tes playlists', `<div class="shelf">${R.mine.map(plCard).join('')}</div>`);
       if (!R.recent.length && !R.top.length && !R.loved.length && !R.forYou.length)
         html += `<div class="empty"><b>Rien pour l'instant</b><span>Relie Spotify ou Deezer à Last.fm / ListenBrainz : tes écoutes apparaîtront ici.</span></div>`;
@@ -615,6 +763,55 @@ function vHome(){
   }
   if (S.tracks.length) html += localHome();
   return html;
+}
+/* Vitrine : ton n°1 du mois (ou ta dernière écoute), façon « Grand écran » de Nova STREAM */
+function billboardHTML(hello, accOK){
+  const R = S.remote || {};
+  const hero = (R.top && R.top[0]) || (R.recent && R.recent[0]) || null;
+  if (!hero){
+    return `<section class="billboard"><div class="bb-fallback"></div><div class="bb-in">
+      <span class="lbl">${esc(hello)}</span>
+      <h1>Ta musique, <span class="text-grad">tes comptes</span>.</h1>
+      <p>${accOK ? 'Tes écoutes arrivent…' : 'Connecte ListenBrainz ou Last.fm pour remplir ton accueil.'}</p>
+      ${S.tracks.length ? `<div class="bb-acts"><button class="btn primary" data-act="shuffleAll">${ic('shuffle')} Mes fichiers en aléatoire</button></div>` : ''}
+    </div></section>`;
+  }
+  const isTop = R.top && R.top[0] === hero, src = artOf(hero), id = regList(isTop ? R.top : R.recent);
+  return `<section class="billboard">
+    ${src ? `<img class="bb-img" src="${esc(src)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">` : '<div class="bb-fallback"></div>'}
+    <div class="bb-cover">${cover(hero, hero.album || hero.title)}</div>
+    <div class="bb-in">
+      <div><span class="chip hot">${isTop ? 'N°1 de ton mois' : 'Ta dernière écoute'}</span></div>
+      <h1>${esc(hero.title)}</h1>
+      <p>${esc([hero.artist, hero.album].filter(Boolean).join(' · '))}</p>
+      <div class="bb-acts">
+        <button class="btn primary" data-act="playList" data-list="${id}">${ic('play', 1)} Écouter</button>
+        <button class="btn glass" data-act="mixRemote">${ic('shuffle')} Mon mix</button>
+      </div>
+    </div></section>`;
+}
+/* Tuiles « Quelle envie ? » : une porte d'entrée par usage */
+function moodsHTML(){
+  const R = S.remote || {}, out = [];
+  const tile = (attr, icon, title, sub, c) => `<button class="mood" ${attr} style="background:linear-gradient(135deg,${c[0]} 0%,${c[0]} 38%,${c[1]} 170%)">${ic(icon)}<b>${title}</b><span style="color:${c[1]}">${sub}</span></button>`;
+  out.push(tile('data-act="mixRemote"', 'shuffle', 'Mon mix', 'Tops, aimés et récents', ['#5a1426', '#ff8aa0']));
+  if (R.forYou && R.forYou[0]) out.push(tile(`data-go="playlist:${esc(R.forYou[0].mbid)}"`, 'disc', 'Découvertes', 'Préparé par ListenBrainz', ['#2a1430', '#d9a4ff']));
+  if (R.loved && R.loved.length) out.push(tile('data-go="rlist:loved"', 'heart', 'Titres aimés', plural(R.loved.length, 'titre'), ['#3d1424', '#f2d7b6']));
+  if (R.recent && R.recent.length) out.push(tile('data-go="rlist:recent"', 'refresh', 'Encore une fois', 'Tes dernières écoutes', ['#2c1a12', '#ffc27a']));
+  out.push(tile('data-go="library:favoris"', 'heart', 'Favoris', plural(favList().length, 'titre'), ['#331018', '#ff9aa8']));
+  if (S.tracks.length) out.push(tile('data-go="library:titres"', 'lib', 'Hors ligne', 'Fichiers du téléphone', ['#16201c', '#8fe3c4']));
+  return `<div class="moods">${out.join('')}</div>`;
+}
+/* Top 10 avec gros chiffres détourés, comme sur Nova STREAM */
+function top10HTML(list){
+  const top = list.slice(0, 10), id = regList(list);
+  return `<section class="blk"><div class="blk-h"><h2><span class="badge10">TOP 10</span>Ton mois</h2>${list.length > 10 ? `<button class="link" data-go="rlist:top">Tout voir</button>` : ''}</div>
+    <div class="top10">${top.map((t, i) => `<div class="t10"><span class="num" aria-hidden="true">${i + 1}</span>${tcard(t, id, i)}</div>`).join('')}</div></section>`;
+}
+const tcard = (t, list, i) => `<div class="tcard" role="button" tabindex="0" data-list="${list}" data-i="${i}" data-id="${esc(t.id)}" aria-label="${esc(t.title + ' – ' + t.artist)}">${cover(t, t.album || t.title)}<b>${esc(t.title)}</b><span>${esc(t.artist)}</span></div>`;
+function tshelfHTML(list){
+  const id = regList(list);
+  return `<div class="tshelf">${list.map((t, i) => tcard(t, id, i)).join('')}</div>`;
 }
 function localHome(){
   const recentAlbums = [];
@@ -731,7 +928,7 @@ async function loadPlaylist(){
 }
 
 function vSearch(){
-  return `<div class="searchbox">${ic('search')}<input type="search" id="q" placeholder="Titre, artiste ou album" autocomplete="off" enterkeyhint="search"></div>
+  return `<h1 class="hello">Recherche</h1><div class="searchbox">${ic('search')}<input type="search" id="q" placeholder="Titre, artiste ou album" autocomplete="off" enterkeyhint="search"></div>
     <div id="results">${searchResults(S.query)}</div>`;
 }
 function searchResults(q){
@@ -849,7 +1046,9 @@ const repeatCode = () => [0, 2, 1][S.repeat]; // interface : 0 non, 1 file, 2 ti
    ====================================================================== */
 const YT_DAILY = 100;
 let ytCache = store.get('ytcache', {});
-const ytKey = () => (N && N.youtubeKey ? N.youtubeKey() : (window.__ytKey || ''));
+const ytKey = () => (window.__ytKey != null && window.__ytKey !== '' ? window.__ytKey : (N && N.youtubeKey ? N.youtubeKey() : ''));
+const ytBuiltIn = () => !!(N && N.youtubeKeyBuiltIn && N.youtubeKeyBuiltIn());
+const ytManual = () => !!(N && N.youtubeKeyManual ? N.youtubeKeyManual() : window.__ytKey);
 function ytQuota(){
   // Le quota YouTube repart à zéro à minuit, heure de Californie
   const day = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Los_Angeles' }).format(new Date());
@@ -1060,7 +1259,6 @@ const YTE = {
       if (t && t.vi > 0 && t.vids){ const good = t.vids[t.vi]; t.vids = [good].concat(t.vids.filter(v => v !== good)); t.vi = 0; ytCache[songKey(t)] = t.vids; saveYtCache(); }
     }
     N && N.keepScreenOn && N.keepScreenOn(s === 1 || s === 3);
-    if (t && N && N.ytPlayback) N.ytPlayback(t.title || '', t.artist || '', s === 1 || s === 3 || (this.wantPlay && s !== 2));
     if (s === 0) this.ended();
     paintPlay();
   },
@@ -1097,7 +1295,7 @@ const YTE = {
     this.wantPlay = true; p.playVideo();
   },
   pause(){ this.wantPlay = false; const p = this.live(); if (p) p.pauseVideo(); },
-  stop(){ this.pause(); this.token++; N && N.keepScreenOn && N.keepScreenOn(false); N && N.ytStop && N.ytStop(); },
+  stop(){ this.pause(); this.token++; N && N.keepScreenOn && N.keepScreenOn(false); },
   seek(ms){ const p = this.live(); if (p) p.seekTo(ms / 1000, true); else this.resumePos = ms; },
   skipTo(k){ if (k >= 0 && k < this.q.length){ this.i = k; this.load(0, true); } },
   setRepeat(m){ this.rep = m; },
@@ -1148,9 +1346,120 @@ function useEngine(remote){
   layoutYT();
 }
 
-/* Lecteur YouTube toujours caché : seul le son est joué */
+/* Position de la vidéo : à la place de la pochette dans le lecteur, sinon fenêtre flottante (coin au choix) */
+S.video = Object.assign({ mode: 'float', corner: 'br', frame: true }, store.get('video', {}));
+const saveVideo = () => store.set('video', S.video);
+function floatPos(corner){
+  const W = 200, H = 222, m = 12, vw = window.innerWidth, vh = window.innerHeight;
+  const topY = 66 + m, botY = vh - (parseInt(getComputedStyle(document.documentElement).getPropertyValue('--navh')) || 66) - 64 - 30 - H;
+  let c = corner;
+  if (!$('#sheet').hidden && c[0] === 'b') c = 't' + c[1]; // une feuille ouverte en bas : la vidéo monte
+  return { left: c[1] === 'l' ? m : vw - W - m, top: c[0] === 't' ? topY : Math.max(topY, botY) };
+}
 function layoutYT(){
-  $('#ytBox').hidden = false;
+  const box = $('#ytBox');
+  const playerOpen = !$('#player').hidden;
+  let on = isYt() && !!YTE.player && YTE.q.length > 0;
+  // Option « dans le lecteur seulement » : hors du lecteur, la vidéo (en pause) disparaît
+  if (on && !playerOpen && S.video.mode === 'player' && !YTE.wantPlay && YTE.st !== 1) on = false;
+  document.body.classList.toggle('yt-on', on);
+  box.hidden = !on;
+  if (!on) return;
+  const slot = playerOpen && $('#plCover .yt-slot');
+  const frame = S.video.frame ? ' framed' : '';
+  if (slot){
+    const r = slot.getBoundingClientRect();
+    box.className = 'ytbox dock' + frame;
+    Object.assign(box.style, { left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.height + 'px' });
+  } else if (!box.classList.contains('dragging')){
+    const p = floatPos(S.video.corner);
+    box.className = 'ytbox float' + frame;
+    Object.assign(box.style, { left: p.left + 'px', top: p.top + 'px', width: '', height: '' });
+  }
+}
+/* Fenêtre flottante : on la glisse avec la poignée (au-dessus de la vidéo, jamais dessus) ; elle se range dans le coin le plus proche */
+(function bindDrag(){
+  const grip = $('#ytGrip'), box = $('#ytBox');
+  let start = null;
+  grip.addEventListener('pointerdown', e => {
+    if (!box.classList.contains('float')) return;
+    start = { x: e.clientX, y: e.clientY, l: box.offsetLeft, t: box.offsetTop };
+    box.classList.add('dragging'); grip.setPointerCapture(e.pointerId);
+  });
+  grip.addEventListener('pointermove', e => {
+    if (!start) return;
+    box.style.left = Math.max(0, Math.min(window.innerWidth - box.offsetWidth, start.l + e.clientX - start.x)) + 'px';
+    box.style.top = Math.max(0, Math.min(window.innerHeight - box.offsetHeight, start.t + e.clientY - start.y)) + 'px';
+  });
+  const end = () => {
+    if (!start) return;
+    start = null;
+    const cx = box.offsetLeft + box.offsetWidth / 2, cy = box.offsetTop + box.offsetHeight / 2;
+    S.video.corner = (cy < window.innerHeight / 2 ? 't' : 'b') + (cx < window.innerWidth / 2 ? 'l' : 'r');
+    saveVideo(); box.classList.remove('dragging'); layoutYT();
+  };
+  grip.addEventListener('pointerup', end);
+  grip.addEventListener('pointercancel', end);
+  grip.addEventListener('keydown', e => {
+    const order = ['tl', 'tr', 'br', 'bl'];
+    if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); S.video.corner = order[(order.indexOf(S.video.corner) + 1) % 4]; saveVideo(); layoutYT(); }
+  });
+})();
+function videoCardHTML(){
+  const v = S.video;
+  const opt = (m, title, sub) => `<button class="vopt" role="radio" aria-checked="${v.mode === m}" data-act="vMode" data-m="${m}"><span class="dot"></span><span><b>${title}</b><span>${sub}</span></span></button>`;
+  const corner = (k, label) => `<button class="${k}" aria-label="${label}" aria-pressed="${v.corner === k}" data-act="vCorner" data-c="${k}"></button>`;
+  return `<div class="acc-h"><span class="badge yt">${ic('play', 1)}</span><div><b>Vidéo YouTube</b><span>Toujours visible pendant la lecture</span></div></div>
+    <span class="lbl">Quand tu quittes le lecteur</span>
+    <div role="radiogroup" aria-label="Quand tu quittes le lecteur" style="display:grid;gap:8px">
+      ${opt('float', 'Fenêtre flottante', 'La musique continue, la vidéo suit dans un coin.')}
+      ${opt('player', 'Dans le lecteur seulement', 'Pause dès que tu navigues ailleurs.')}
+    </div>
+    ${v.mode === 'float' ? `<span class="lbl">Coin de la fenêtre</span>
+    <div class="corners"><div class="phone">${corner('tl', 'En haut à gauche')}${corner('tr', 'En haut à droite')}${corner('bl', 'En bas à gauche')}${corner('br', 'En bas à droite')}</div>
+      <p class="help">Touche un coin, ou glisse la fenêtre par sa poignée. Taille fixe de 200 × 200 px : le minimum demandé par YouTube.</p></div>` : ''}
+    <label class="switch">Cadre aux couleurs de l'appli<input type="checkbox" data-act="vFrame"${v.frame ? ' checked' : ''}></label>`;
+}
+
+/* ======================================================================
+   Intro « Supernova » (reprise de Nova STREAM, couleurs Bordeaux)
+   ====================================================================== */
+function startIntro(){
+  let seen = false;
+  try { seen = sessionStorage.getItem('novamusique.intro') === '1'; sessionStorage.setItem('novamusique.intro', '1'); } catch (e) {}
+  if (seen || window.__noIntro || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
+  const el = $('#intro'), cv = $('#introStars'), ctx = cv.getContext && cv.getContext('2d');
+  el.hidden = false;
+  const COLORS = ['255,255,255', '200,57,90', '255,107,134', '242,215,182'];
+  let w = cv.width = innerWidth, h = cv.height = innerHeight, raf = 0, done = false;
+  const maxR = Math.max(w, h) * .75;
+  const stars = Array.from({ length: Math.round(Math.min(320, Math.max(140, w * h / 5000))) }, () => {
+    const a = Math.random() * Math.PI * 2;
+    return { cos: Math.cos(a), sin: Math.sin(a), c: (Math.random() * 4) | 0, z: .3 + Math.random() * .7, r: 30 + Math.random() * maxR };
+  });
+  const t0 = performance.now();
+  const frame = now => {
+    if (done || !ctx) return;
+    const t = (now - t0) / 1000, cx = w / 2, cy = h / 2;
+    ctx.clearRect(0, 0, w, h);
+    if (t < 1.4){
+      const speed = 1 + 9 * t * t, fade = t < .25 ? t / .25 : t > 1.2 ? Math.max(0, (1.4 - t) / .2) : 1;
+      ctx.lineCap = 'round';
+      for (const s of stars){
+        const prev = s.r;
+        s.r -= s.z * speed * 6;
+        if (s.r < 4){ if (t < 1) s.r = 40 + Math.random() * maxR; else continue; }
+        ctx.strokeStyle = `rgba(${COLORS[s.c]},${(.45 + s.z * .55) * fade})`;
+        ctx.lineWidth = .8 + s.z * 1.6;
+        ctx.beginPath(); ctx.moveTo(cx + s.cos * prev, cy + s.sin * prev); ctx.lineTo(cx + s.cos * s.r, cy + s.sin * s.r); ctx.stroke();
+      }
+    }
+    if (t < 3.5) raf = requestAnimationFrame(frame);
+  };
+  requestAnimationFrame(() => { el.classList.add('run'); raf = requestAnimationFrame(frame); });
+  const end = () => { if (done) return; done = true; cancelAnimationFrame(raf); el.hidden = true; el.classList.remove('run', 'skip'); };
+  el.addEventListener('click', () => { el.classList.add('skip'); setTimeout(end, 260); }, { once: true });
+  setTimeout(end, 3500);
 }
 
 function playList(list, start = 0, shuffle = S.shuffle){
@@ -1225,6 +1534,7 @@ function togglePlay(){
   if (!E || !S.queue.length) return;
   // État réel du lecteur (pas celui lu il y a une demi-seconde) : deux appuis rapides restent fiables
   const playing = isYt() ? (YTE.st === 1 || (YTE.wantPlay && !YTE.failed && YTE.st !== 2)) : !!S.p.p;
+  if (!playing && isYt() && S.video.mode === 'player' && $('#player').hidden) openPlayer();
   if (playing) E.pause(); else E.play();
   S.p.p = !playing; paintPlay();
 }
@@ -1313,16 +1623,22 @@ function progress(){
   }
 }
 function markPlaying(){
-  $$('.row.on').forEach(r => r.classList.remove('on'));
-  if (S.curId) $$(`.row[data-id="${CSS.escape(S.curId)}"]`).forEach(r => r.classList.add('on'));
+  $$('.row.on,.tcard.on').forEach(r => r.classList.remove('on'));
+  if (S.curId) $$(`.row[data-id="${CSS.escape(S.curId)}"],.tcard[data-id="${CSS.escape(S.curId)}"]`).forEach(r => r.classList.add('on'));
 }
 
 /* Lecteur plein écran */
-function openPlayer(){ if (!cur()) return; $('#player').hidden = false; paintPlayer(); progress(); layoutYT(); }
-function closePlayer(){ $('#player').hidden = true; layoutYT(); }
+function openPlayer(){ if (!cur()) return; $('#player').hidden = false; paintPlayer(); progress(); layoutYT(); setTimeout(layoutYT, 320); }
+function closePlayer(){
+  $('#player').hidden = true;
+  if (isYt() && S.video.mode === 'player' && (YTE.wantPlay || YTE.st === 1)){ YTE.pause(); S.p.p = false; paintPlay(); toast('Pause : la vidéo ne s\'affiche que dans le lecteur'); }
+  layoutYT();
+}
 function paintPlayer(){
   const t = cur(); if (!t) return;
-  $('#plCover').innerHTML = cover(t, t.album || t.title);
+  const slot = $('#plCover .yt-slot');
+  if (isYt()){ if (!slot) $('#plCover').innerHTML = '<div class="yt-slot"></div>'; }
+  else $('#plCover').innerHTML = cover(t, t.album || t.title);
   const bg = $('#plBg'), src = artOf(t);
   bg.style.display = src ? '' : 'none'; bg.onerror = () => bg.style.display = 'none'; if (src) bg.src = src; else bg.removeAttribute('src');
   $('#plTitle').textContent = t.title;
@@ -1431,11 +1747,11 @@ function vProfile(){
         <button class="btn primary" type="submit" id="lbBtn">Connecter ListenBrainz</button>
       </form>`;
   const yk = ytKey(), yq = ytQuota(), cached = Object.keys(ytCache).length;
-  const yt = yk ? `
-      <div class="acc-h"><span class="badge yt">${ic('play', 1)}</span><div><b>YouTube</b><span class="ok">Clé enregistrée</span></div></div>
+  const yt = yk && !S.ytForm ? `
+      <div class="acc-h"><span class="badge yt">${ic('play', 1)}</span><div><b>YouTube</b><span class="ok">${ytManual() ? 'Clé collée à la main' : ytBuiltIn() ? 'Clé intégrée à l\'appli (secret GitHub)' : 'Clé enregistrée'}</span></div></div>
       <p class="help">${yq.out ? '<b>Quota du jour atteint</b>, retour demain. ' : ''}${yq.n}/${YT_DAILY} recherches aujourd'hui · ${plural(cached, 'titre mémorisé', 'titres mémorisés')} (ceux-là ne coûtent plus rien).</p>
       <p class="help">Les versions « YouTube Music » (audio officiel des chaînes « Artiste - Topic ») sont choisies en priorité. La vidéo reste visible et l'écran allumé pendant la lecture, comme l'exige YouTube.</p>
-      <div class="btns"><button class="btn small" data-act="ytRemoveKey">Retirer la clé</button></div>`
+      <div class="btns">${ytManual() ? `<button class="btn small" data-act="ytRemoveKey">${ytBuiltIn() ? 'Revenir à la clé intégrée' : 'Retirer la clé'}</button>` : `<button class="btn small" data-act="ytOtherKey">Utiliser une autre clé</button>`}</div>`
     : `
       <div class="acc-h"><span class="badge yt">${ic('play', 1)}</span><div><b>YouTube</b><span>Pas de clé : la lecture de tes comptes est impossible</span></div></div>
       <form class="form" data-form="yt" autocomplete="off">
@@ -1447,7 +1763,7 @@ function vProfile(){
         </ol>
         <div class="field"><label for="ytKeyIn">Clé API YouTube</label><input type="text" id="ytKeyIn" spellcheck="false" autocapitalize="off" placeholder="AIza…"></div>
         <p class="err" id="ytErr" hidden></p>
-        <button class="btn primary" type="submit" id="ytBtn">Enregistrer la clé</button>
+        <div class="btns"><button class="btn primary" type="submit" id="ytBtn">Enregistrer la clé</button>${yk ? `<button class="btn" type="button" data-act="ytCancel">Annuler</button>` : ''}</div>
       </form>`;
   const pending = (a.lfm.pending || 0) + (a.lb.pending || 0);
   const srcs = [a.lfm.connected && 'lfm', a.lb.connected && 'lb'].filter(Boolean);
@@ -1457,6 +1773,7 @@ function vProfile(){
     <div class="acc">${lb}</div>
     <div class="acc">${lfm}</div>
     <div class="acc">${yt}</div>
+    <div class="acc">${videoCardHTML()}</div>
     ${pending ? `<div style="margin-top:14px"><button class="btn small" data-act="flush">${ic('send')} Envoyer les ${pending} écoutes en attente</button></div>` : ''}
     ${stats}
     ${blk('Fichiers du téléphone', N && !N.hasPermission() ? `<p class="muted" style="margin:0 0 12px">Facultatif : pour écouter aussi tes MP3 / FLAC, même hors ligne.</p><button class="btn small" data-act="askPermission">Autoriser l'accès</button>` : `<p class="muted" style="margin:0 0 12px">${plural(S.tracks.length, 'titre')} · ${plural(S.albums.length, 'album')} · ${plural(S.artists.length, 'artiste')}</p>
@@ -1536,10 +1853,10 @@ function submitForm(form){
     const k = $('#ytKeyIn').value.trim(), err = $('#ytErr'), b = $('#ytBtn');
     if (!/^AIza[0-9A-Za-z_\-]{30,}$/.test(k)){ err.textContent = 'Une clé API YouTube commence par « AIza » et fait 39 caractères. Vérifie la copie.'; err.hidden = false; return; }
     err.hidden = true; b.disabled = true; b.textContent = 'Vérification…';
-    const old = ytKey();
+    const oldManual = ytManual() ? ytKey() : '';
     window.__ytKey = k; N && N.setYoutubeKey(k);
-    ytApi('videos', { part: 'id', id: 'jNQXAC9IVRw' }).then(() => { toast('Clé YouTube enregistrée'); render(window.scrollY); }, e => {
-      window.__ytKey = old; N && N.setYoutubeKey(old);
+    ytApi('videos', { part: 'id', id: 'jNQXAC9IVRw' }).then(() => { S.ytForm = false; window.__ytKey = N ? '' : k; toast('Clé YouTube enregistrée'); render(window.scrollY); }, e => {
+      window.__ytKey = N ? '' : oldManual; N && N.setYoutubeKey(oldManual);
       err.textContent = e.code === 'net' ? e.message : 'Clé refusée par YouTube : vérifie la copie, et que « YouTube Data API v3 » est bien activée.';
       err.hidden = false; b.disabled = false; b.textContent = 'Enregistrer la clé';
     });
@@ -1599,6 +1916,10 @@ const ACTS = {
   qRemove: el => { const k = +el.dataset.k; E.removeAt(k); S.queue.splice(k, 1); openQueue(); },
   qClear: () => { E.replaceUpcoming('[]'); S.queue = S.queue.slice(0, (S.p.i || 0) + 1); openQueue(); },
   ytRemoveKey: () => { N && N.setYoutubeKey(''); window.__ytKey = ''; render(window.scrollY); },
+  ytOtherKey: () => { S.ytForm = true; render(window.scrollY); },
+  ytCancel: () => { S.ytForm = false; render(window.scrollY); },
+  vMode: el => { S.video.mode = el.dataset.m; saveVideo(); render(window.scrollY); layoutYT(); },
+  vCorner: el => { S.video.corner = el.dataset.c; saveVideo(); $$('[data-act=vCorner]').forEach(b => b.setAttribute('aria-pressed', b === el)); layoutYT(); },
   libTab: el => { S.libTab = el.dataset.tab; store.set('libTab', S.libTab); S.params = { tab: S.libTab }; render(); },
   toggleScrob: el => { N && N.setScrobbling(el.dataset.s, el.checked); loadAccounts(); },
   logout: el => openSheet(`<div class="sheet-head"><div class="rm"><b>Déconnecter ${el.dataset.s === 'lfm' ? 'Last.fm' : 'ListenBrainz'} ?</b><span>Les écoutes en attente pour ce compte ne seront pas envoyées.</span></div></div>
@@ -1626,7 +1947,7 @@ document.addEventListener('click', e => {
     else { if (v === S.view && !S.stack.length){ window.scrollTo({ top: 0, behavior: 'smooth' }); return; } nav(v); }
     return;
   }
-  const r = e.target.closest('.row[data-list]');
+  const r = e.target.closest('.row[data-list], .tcard[data-list]');
   if (r){
     const list = S.lists.get(r.dataset.list), i = +r.dataset.i;
     if (!list || !list[i]) return;
@@ -1640,6 +1961,7 @@ document.addEventListener('change', e => {
   const t = e.target;
   if (t.dataset.act === 'libSort'){ S.libSort[S.params.tab || S.libTab] = t.value; store.set('libSort', S.libSort); render(); }
   if (t.dataset.act === 'toggleScrob') ACTS.toggleScrob(t);
+  if (t.dataset.act === 'vFrame'){ S.video.frame = t.checked; saveVideo(); layoutYT(); }
 });
 document.addEventListener('submit', e => { const f = e.target.closest('form[data-form]'); if (f){ e.preventDefault(); submitForm(f); } });
 let searchT = 0;
@@ -1685,7 +2007,7 @@ window.novaEvent = ev => {
       if (S.view === 'library') render(window.scrollY);
     }
   } else if (ev.type === 'hidden'){
-    // Lecture en arrière-plan : la musique continue
+    if (isYt()) YTE.pause(); // YouTube : pas de lecture en arrière-plan
   } else if (ev.type === 'resume'){
     if (S.ready){
       loadHistory(); loadAccounts();
@@ -1722,11 +2044,13 @@ function startScan(){
 /* ======================================================================
    Démarrage
    ====================================================================== */
+startIntro();
 bindSeek();
 setShuffle(S.shuffle);
 paintRepeat();
-window.novaYt = cmd => { if (!isYt()) return; if (cmd === 'next') YTE.next(); else if (cmd === 'prev') YTE.previous(); else (YTE.st === 1 ? YTE.pause() : YTE.play()); };
+document.addEventListener('visibilitychange', () => { if (document.hidden && isYt()) YTE.pause(); });
 window.addEventListener('resize', () => layoutYT());
+window.addEventListener('scroll', () => $('#top').classList.toggle('scrolled', window.scrollY > 20), { passive: true });
 $('#player').addEventListener('animationend', () => layoutYT()); // vidéo recalée une fois le lecteur ouvert
 if (N){
   // Les fichiers du téléphone sont facultatifs : sans permission, on démarre sur les comptes

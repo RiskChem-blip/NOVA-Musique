@@ -16,6 +16,9 @@ android {
         targetSdk = 34
         versionCode = runNumber
         versionName = "1.0.$runNumber"
+        // Clé YouTube : secret GitHub YOUTUBE_API_KEY, injecté au moment de fabriquer l'APK (jamais écrit dans le code)
+        val ytKey = (System.getenv("YOUTUBE_API_KEY") ?: "").trim().replace("\\", "").replace("\"", "")
+        buildConfigField("String", "YT_KEY", "\"$ytKey\"")
     }
 
     buildFeatures {

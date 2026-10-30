@@ -17,7 +17,6 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import android.view.View
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
@@ -45,14 +44,6 @@ class MainActivity : ComponentActivity() {
         /** Origine de l'interface = nom du paquet de l'appli (identité attendue par YouTube). */
         const val HOST = "app.nova.musique"
         private val NET_HOSTS = setOf("ws.audioscrobbler.com", "api.listenbrainz.org", "www.googleapis.com")
-
-        /** Blocage des pubs (best-effort) : domaines publicitaires connus de YouTube/Google. */
-        private val AD_HOSTS = setOf(
-            "doubleclick.net", "googlesyndication.com", "googleadservices.com",
-            "google-analytics.com", "googletagservices.com", "adservice.google.com"
-        )
-        /** Chemins de pub/suivi sur youtube.com (sans toucher au flux audio de googlevideo.com). */
-        private val AD_PATHS = listOf("/pagead/", "/ptracking", "/api/stats/ads", "/get_midroll_info")
     }
 
     private lateinit var web: WebView
@@ -89,10 +80,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // La page se croit toujours visible : le lecteur YouTube continue écran éteint ou appli en arrière-plan
-        web = object : WebView(this) {
-            override fun onWindowVisibilityChanged(visibility: Int) = super.onWindowVisibilityChanged(View.VISIBLE)
-        }
+        web = WebView(this)
         web.setBackgroundColor(0xFF13070A.toInt())
         val s = web.settings
         s.javaScriptEnabled = true
@@ -125,15 +113,6 @@ class MainActivity : ComponentActivity() {
         web.webChromeClient = WebChromeClient()
         web.addJavascriptInterface(Bridge(), "NovaMusiqueAndroid")
 
-        YtService.onAction = { a ->
-            val cmd = when (a) {
-                YtService.ACTION_NEXT -> "next"
-                YtService.ACTION_PREV -> "prev"
-                else -> "toggle"
-            }
-            js("window.novaYt && novaYt('$cmd')")
-        }
-
         setContentView(web)
         web.loadUrl("https://$HOST/index.html")
 
@@ -155,6 +134,7 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onStop() {
+        // YouTube n'autorise pas la lecture en arrière-plan : l'interface met en pause
         try {
             web.evaluateJavascript("window.novaEvent && novaEvent({type:'hidden'})", null)
         } catch (_: Exception) {
@@ -164,8 +144,6 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onDestroy() {
-        YtService.onAction = null
-        YtService.stop(this)
         bg.shutdown()
         web.destroy()
         super.onDestroy()
@@ -563,34 +541,20 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        /** Lecture YouTube en arrière-plan : notification + appli gardée active. */
-        @JavascriptInterface
-        fun ytPlayback(title: String, artist: String, playing: Boolean) {
-            main.post {
-                val prefs = Scrobbler.prefs(this@MainActivity)
-                if (playing && Build.VERSION.SDK_INT >= 33 && !prefs.getBoolean("notif_asked", false) &&
-                    ContextCompat.checkSelfPermission(this@MainActivity, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
-                ) {
-                    prefs.edit().putBoolean("notif_asked", true).apply()
-                    requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 7)
-                }
-                try {
-                    YtService.update(this@MainActivity, title, artist, playing)
-                } catch (_: Exception) {
-                }
-            }
-        }
-
-        @JavascriptInterface
-        fun ytStop() {
-            main.post { YtService.stop(this@MainActivity) }
-        }
-
         @JavascriptInterface
         fun stopNative() = withPlayer { it.pause() }
 
         @JavascriptInterface
-        fun youtubeKey(): String = Scrobbler.prefs(this@MainActivity).getString("yt_key", "") ?: ""
+        fun youtubeKey(): String =
+            (Scrobbler.prefs(this@MainActivity).getString("yt_key", "") ?: "").ifBlank { BuildConfig.YT_KEY }
+
+        /** true si l'APK a été fabriqué avec le secret GitHub YOUTUBE_API_KEY. */
+        @JavascriptInterface
+        fun youtubeKeyBuiltIn(): Boolean = BuildConfig.YT_KEY.isNotBlank()
+
+        /** true si une clé a été collée à la main (elle remplace la clé intégrée). */
+        @JavascriptInterface
+        fun youtubeKeyManual(): Boolean = !(Scrobbler.prefs(this@MainActivity).getString("yt_key", "") ?: "").isBlank()
 
         @JavascriptInterface
         fun setYoutubeKey(key: String) {

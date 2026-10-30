@@ -1,5 +1,7 @@
 # Nova Musique : ta musique sur Android, avec Last.fm et ListenBrainz
 
+Même famille que Nova STREAM : intro « Supernova », vitrine, envies, Top 10, thème Bordeaux.
+
 Nova Musique lit les fichiers musicaux de ton téléphone (MP3, FLAC, M4A, OGG…) et envoie
 chaque écoute à tes comptes Last.fm et ListenBrainz.
 GitHub fabrique l'APK automatiquement à chaque dépôt du projet, comme pour Nova.
@@ -33,14 +35,28 @@ joué par le lecteur YouTube officiel, intégré à l'appli.
 
 - **Versions « YouTube Music »** : l'appli choisit en priorité l'audio officiel publié par
   les chaînes « Artiste - Topic », le même son que YouTube Music.
-- **Lecteur invisible** : la vidéo YouTube n'apparaît plus, seul le son est joué et la
-  pochette s'affiche dans le lecteur.
-- **Arrière-plan** : la musique continue appli en arrière-plan ou écran éteint, avec une
-  notification (précédent, pause, suivant). Balayer l'appli hors des récentes arrête la lecture. L'écran reste allumé pendant la lecture, et la lecture se
-  met en pause si tu quittes l'appli. Pas de téléchargement hors ligne : pour le hors ligne,
-  utilise les fichiers du téléphone.
+- **Règles YouTube** : la vidéo reste visible, à la place de la pochette dans le lecteur.
+  Quand tu navigues, au choix (**Comptes › Vidéo YouTube**) : une fenêtre flottante de
+  200 × 200 px que tu ranges dans le coin de ton choix (glisse-la par sa poignée), ou la
+  pause dès que tu quittes le lecteur. L'écran reste allumé pendant la lecture et la lecture
+  se met en pause si tu quittes l'appli. Pas de téléchargement hors ligne : pour le hors
+  ligne et l'écoute écran éteint, utilise les fichiers du téléphone.
 - **Spotify et Deezer** : relie-les à Last.fm (et Spotify à ListenBrainz) depuis leurs
   réglages ; tout ce que tu y écoutes apparaîtra dans l'accueil.
+
+### La clé YouTube intégrée à l'appli (secret GitHub)
+
+Pour ne plus jamais la retaper : range-la une fois dans les secrets du dépôt, et chaque APK
+fabriqué par GitHub l'aura déjà.
+
+1. Sur GitHub, dans le dépôt : **Settings › Secrets and variables › Actions › New repository secret**.
+2. Nom : `YOUTUBE_API_KEY`. Valeur : ta clé (elle commence par « AIza »). **Add secret**.
+3. **Actions › Fabriquer l'APK Nova Musique › Run workflow** (ou attends la prochaine mise à jour).
+
+La clé n'apparaît jamais dans le code ni sur GitHub. Elle est en revanche **dans l'APK** :
+garde le dépôt privé, ne partage pas l'APK, et limite la clé à « YouTube Data API v3 »
+dans Google Cloud (étape 4 ci-dessous). Dans **Comptes › YouTube**, tu peux toujours coller
+une autre clé à la main ; elle remplace alors la clé intégrée.
 
 ### Créer la clé YouTube (gratuite, une seule fois)
 

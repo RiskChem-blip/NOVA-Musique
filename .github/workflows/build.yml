@@ -22,6 +22,9 @@ jobs:
           ls "${ANDROID_HOME:-$ANDROID_SDK_ROOT}"
 
       - name: Fabriquer l'APK
+        env:
+          # Réglage à faire une fois : Settings › Secrets and variables › Actions › New repository secret
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
         run: |
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon --stacktrace
