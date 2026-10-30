@@ -4,3 +4,10 @@ app/build/
 local.properties
 .idea/
 *.iml
+.env
+.env.*
+*.env
+credentials.json
+*.pem
+*.key
+.credentials

@@ -45,6 +45,14 @@ class MainActivity : ComponentActivity() {
         /** Origine de l'interface = nom du paquet de l'appli (identité attendue par YouTube). */
         const val HOST = "app.nova.musique"
         private val NET_HOSTS = setOf("ws.audioscrobbler.com", "api.listenbrainz.org", "www.googleapis.com")
+
+        /** Blocage des pubs (best-effort) : domaines publicitaires connus de YouTube/Google. */
+        private val AD_HOSTS = setOf(
+            "doubleclick.net", "googlesyndication.com", "googleadservices.com",
+            "google-analytics.com", "googletagservices.com", "adservice.google.com"
+        )
+        /** Chemins de pub/suivi sur youtube.com (sans toucher au flux audio de googlevideo.com). */
+        private val AD_PATHS = listOf("/pagead/", "/ptracking", "/api/stats/ads", "/get_midroll_info")
     }
 
     private lateinit var web: WebView
