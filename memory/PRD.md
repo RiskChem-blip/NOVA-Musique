@@ -5,5 +5,8 @@ Choix : complètement invisible.
 - Lecteur YouTube caché (cadre 2px, opacité ~0, sans clics), toujours actif pour garder le son
 - Pochette affichée dans le lecteur plein écran à la place de la vidéo
 - LISEZMOI mis à jour
+- Lecture YouTube en arrière-plan : WebView toujours "visible", plus de pause sur hidden/visibilitychange,
+  service YtService (premier plan, wake lock + wifi lock, notification précédent/pause/suivant -> window.novaYt)
 ## Backlog
-- Lecture en arrière-plan (actuellement pause à la sortie de l'appli, MainActivity.onStop)
+- Laisser l'écran s'éteindre pendant la lecture YouTube (keepScreenOn)
+- Notification style média / écran verrouillé avec pochette

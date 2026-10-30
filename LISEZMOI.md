@@ -34,7 +34,9 @@ joué par le lecteur YouTube officiel, intégré à l'appli.
 - **Versions « YouTube Music »** : l'appli choisit en priorité l'audio officiel publié par
   les chaînes « Artiste - Topic », le même son que YouTube Music.
 - **Lecteur invisible** : la vidéo YouTube n'apparaît plus, seul le son est joué et la
-  pochette s'affiche dans le lecteur. L'écran reste allumé pendant la lecture, et la lecture se
+  pochette s'affiche dans le lecteur.
+- **Arrière-plan** : la musique continue appli en arrière-plan ou écran éteint, avec une
+  notification (précédent, pause, suivant). Balayer l'appli hors des récentes arrête la lecture. L'écran reste allumé pendant la lecture, et la lecture se
   met en pause si tu quittes l'appli. Pas de téléchargement hors ligne : pour le hors ligne,
   utilise les fichiers du téléphone.
 - **Spotify et Deezer** : relie-les à Last.fm (et Spotify à ListenBrainz) depuis leurs

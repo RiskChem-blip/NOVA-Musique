@@ -17,6 +17,7 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.view.View
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
@@ -80,7 +81,10 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        web = WebView(this)
+        // La page se croit toujours visible : le lecteur YouTube continue écran éteint ou appli en arrière-plan
+        web = object : WebView(this) {
+            override fun onWindowVisibilityChanged(visibility: Int) = super.onWindowVisibilityChanged(View.VISIBLE)
+        }
         web.setBackgroundColor(0xFF13070A.toInt())
         val s = web.settings
         s.javaScriptEnabled = true
@@ -113,6 +117,15 @@ class MainActivity : ComponentActivity() {
         web.webChromeClient = WebChromeClient()
         web.addJavascriptInterface(Bridge(), "NovaMusiqueAndroid")
 
+        YtService.onAction = { a ->
+            val cmd = when (a) {
+                YtService.ACTION_NEXT -> "next"
+                YtService.ACTION_PREV -> "prev"
+                else -> "toggle"
+            }
+            js("window.novaYt && novaYt('$cmd')")
+        }
+
         setContentView(web)
         web.loadUrl("https://$HOST/index.html")
 
@@ -134,7 +147,6 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onStop() {
-        // YouTube n'autorise pas la lecture en arrière-plan : l'interface met en pause
         try {
             web.evaluateJavascript("window.novaEvent && novaEvent({type:'hidden'})", null)
         } catch (_: Exception) {
@@ -144,6 +156,8 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onDestroy() {
+        YtService.onAction = null
+        YtService.stop(this)
         bg.shutdown()
         web.destroy()
         super.onDestroy()
@@ -539,6 +553,29 @@ class MainActivity : ComponentActivity() {
                 if (on) window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
                 else window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
             }
+        }
+
+        /** Lecture YouTube en arrière-plan : notification + appli gardée active. */
+        @JavascriptInterface
+        fun ytPlayback(title: String, artist: String, playing: Boolean) {
+            main.post {
+                val prefs = Scrobbler.prefs(this@MainActivity)
+                if (playing && Build.VERSION.SDK_INT >= 33 && !prefs.getBoolean("notif_asked", false) &&
+                    ContextCompat.checkSelfPermission(this@MainActivity, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    prefs.edit().putBoolean("notif_asked", true).apply()
+                    requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 7)
+                }
+                try {
+                    YtService.update(this@MainActivity, title, artist, playing)
+                } catch (_: Exception) {
+                }
+            }
+        }
+
+        @JavascriptInterface
+        fun ytStop() {
+            main.post { YtService.stop(this@MainActivity) }
         }
 
         @JavascriptInterface

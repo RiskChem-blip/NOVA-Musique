@@ -1060,6 +1060,7 @@ const YTE = {
       if (t && t.vi > 0 && t.vids){ const good = t.vids[t.vi]; t.vids = [good].concat(t.vids.filter(v => v !== good)); t.vi = 0; ytCache[songKey(t)] = t.vids; saveYtCache(); }
     }
     N && N.keepScreenOn && N.keepScreenOn(s === 1 || s === 3);
+    if (t && N && N.ytPlayback) N.ytPlayback(t.title || '', t.artist || '', s === 1 || s === 3 || (this.wantPlay && s !== 2));
     if (s === 0) this.ended();
     paintPlay();
   },
@@ -1096,7 +1097,7 @@ const YTE = {
     this.wantPlay = true; p.playVideo();
   },
   pause(){ this.wantPlay = false; const p = this.live(); if (p) p.pauseVideo(); },
-  stop(){ this.pause(); this.token++; N && N.keepScreenOn && N.keepScreenOn(false); },
+  stop(){ this.pause(); this.token++; N && N.keepScreenOn && N.keepScreenOn(false); N && N.ytStop && N.ytStop(); },
   seek(ms){ const p = this.live(); if (p) p.seekTo(ms / 1000, true); else this.resumePos = ms; },
   skipTo(k){ if (k >= 0 && k < this.q.length){ this.i = k; this.load(0, true); } },
   setRepeat(m){ this.rep = m; },
@@ -1684,7 +1685,7 @@ window.novaEvent = ev => {
       if (S.view === 'library') render(window.scrollY);
     }
   } else if (ev.type === 'hidden'){
-    if (isYt()) YTE.pause(); // YouTube : pas de lecture en arrière-plan
+    // Lecture en arrière-plan : la musique continue
   } else if (ev.type === 'resume'){
     if (S.ready){
       loadHistory(); loadAccounts();
@@ -1724,7 +1725,7 @@ function startScan(){
 bindSeek();
 setShuffle(S.shuffle);
 paintRepeat();
-document.addEventListener('visibilitychange', () => { if (document.hidden && isYt()) YTE.pause(); });
+window.novaYt = cmd => { if (!isYt()) return; if (cmd === 'next') YTE.next(); else if (cmd === 'prev') YTE.previous(); else (YTE.st === 1 ? YTE.pause() : YTE.play()); };
 window.addEventListener('resize', () => layoutYT());
 $('#player').addEventListener('animationend', () => layoutYT()); // vidéo recalée une fois le lecteur ouvert
 if (N){
